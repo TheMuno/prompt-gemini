@@ -1,0 +1,27 @@
+.query {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 100px auto; 
+}
+
+.query > * {
+    margin-bottom: 10px;
+}
+
+.query > input {
+    height: 35px; 
+}
+
+.query > textarea {
+    height: 100px; 
+}
+
+.output {
+    width:  50%;
+    margin: auto;
+}
+
+.output.hide {
+    display: none;
+}
