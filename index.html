@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="query">
+        <input type="text" class="inp-prompt travel-dates" placeholder="Travel Dates">
+        <input type="text" name="hotel" class="inp-prompt hotel" placeholder="Hotel">
+        <!-- <input type="text" class="attractions">  -->
+        <textarea name="attractions" id="attractions-textarea" class="inp-prompt attractions" placeholder="Attractions"></textarea>
+    </div>
+
+    <div class="output">
+        <div class="prompt">Prompt:<span></span></div>
+        <div class="answer"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="prompts.js"></script>
+    <script>
+        const fp = flatpickr('.travel-dates', {
+            mode: 'range',
+            altInput: true,
+            enableTime: true,
+            altFormat: 'D M j',
+            dateFormat: 'Y-m-d',
+            /*onOpen: (selectedDates, dateStr, instance) => {
+                $requestForm[0].querySelectorAll('.foxy-date-input').forEach(inp => {
+                    inp.remove();
+                });
+            },*/
+            onClose: (selectedDates, dateStr, instance) => {
+                if (!selectedDates.length) return;
+                // appendTravelDates(selectedDates);
+                const days = getDays(dateStr); 
+                localStorage.days = days; 
+            },
+        });
+
+        function getDays(dateStr) {
+            const startDate = dateStr.split('to')[0].trim(); 
+            const endDate = dateStr.split('to')[1].trim(); 
+            const days = Math.ceil( ( new Date(endDate).getTime() - new Date(startDate).getTime() ) / (1000 * 60 * 60 * 24) ) + 1; 
+
+            return days;
+        }
+
+        function generatePrompt() {
+            const days = localStorage.days || 0;
+            const hotel = localStorage.hotel || 'No Hotel';
+            let attractions = localStorage.attractions || 'No Attractions'; 
+            attractions = attractions.split('\n').join(', '); 
+            const str = ` Create a ${days} day plan for NYC that includes ${hotel}, ${attractions}, and restaurants`;
+            return str; 
+        }
+
+        const $inpPrompts = document.querySelectorAll('.inp-prompt'); 
+        const $prompt = document.querySelector('.prompt span');
+
+        $inpPrompts.forEach(inp => {
+            inp.addEventListener('change', e => {
+                const name = e.currentTarget.name;
+                if (!name) return;
+                localStorage[name] = e.currentTarget.value; 
+
+                if ([...$inpPrompts].filter(i => i.value.trim() === '').length) return;
+                const prompt = generatePrompt(); 
+                $prompt.textContent = prompt;
+            });
+        });
+
+        const players = ['mimi','wewe','sisi','nyinyi'];
+
+        fetch('/play', {
+            method: 'POST', 
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(players)
+        }).then(response => {
+            // this line of code depends upon what type of response you're expecting
+            return response.text();     
+        }).then(result => {
+            console.log(result);
+        }).catch(err => {
+            console.log(err);
+        });
+        
+
+    </script>
+</body>
+</html> 
