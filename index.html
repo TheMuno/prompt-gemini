@@ -3,37 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Prompt Gemini</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        .query {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 50%;
+            margin: 100px auto; 
+        }
+
+        .query * {
+            margin-bottom: 10px;
+        }
+
+        .query input {
+            height: 35px; 
+        }
+
+        .query textarea {
+            height: 100px; 
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 50%; 
+        }
+
+        .output {
+            width:  50%;
+            margin: auto;
+        }
+
+        .output.hide {
+            display: none;
+        }
+
+        .output .prompt {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .day {
+            font-weight: bold;
+        }
+
+        .margin-top-20 {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="query">
-        <input type="text" class="inp-prompt travel-dates" placeholder="Travel Dates">
-        <input type="text" name="hotel" class="inp-prompt hotel" placeholder="Hotel">
-        <!-- <input type="text" class="attractions">  -->
-        <textarea name="attractions" id="attractions-textarea" class="inp-prompt attractions" placeholder="Attractions"></textarea>
+        <h1>Prompt Gemini</h1>
+        <form> <!-- action="POST" -->
+            
+            <input type="text" class="inp-prompt travel-dates" placeholder="Travel Dates">
+            <input type="text" name="hotel" class="inp-prompt hotel" placeholder="Hotel">
+            <!-- <input type="text" class="attractions">  -->
+            <textarea name="attractions" id="attractions-textarea" class="inp-prompt attractions" placeholder="Attractions"></textarea>
+        
+        </form>
     </div>
 
     <div class="output">
         <div class="prompt">Prompt:<span></span></div>
-        <div class="answer"></div>
+        <div class="result"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <!-- <script src="prompts.js"></script> -->
     <script>
+        const baseUrl = 'https://a3e1-197-232-61-202.ngrok-free.app/'; //'http://localhost:3000/';
+
         const fp = flatpickr('.travel-dates', {
             mode: 'range',
             altInput: true,
             enableTime: true,
             altFormat: 'D M j',
             dateFormat: 'Y-m-d',
-            /*onOpen: (selectedDates, dateStr, instance) => {
-                $requestForm[0].querySelectorAll('.foxy-date-input').forEach(inp => {
-                    inp.remove();
-                });
-            },*/
             onClose: (selectedDates, dateStr, instance) => {
                 if (!selectedDates.length) return;
                 // appendTravelDates(selectedDates);
@@ -55,15 +104,16 @@
             const hotel = localStorage.hotel || 'No Hotel';
             let attractions = localStorage.attractions || 'No Attractions'; 
             attractions = attractions.split('\n').join(', '); 
-            const str = ` Create a ${days} day plan for NYC that includes ${hotel}, ${attractions}, and restaurants`;
+            const str = ` Create a ${days} day plan for NYC that includes ${hotel}, ${attractions} and restaurants`;
             return str; 
         }
 
         const $inpPrompts = document.querySelectorAll('.inp-prompt'); 
         const $prompt = document.querySelector('.prompt span');
+        const $result = document.querySelector('.result');
 
         $inpPrompts.forEach(inp => {
-            inp.addEventListener('change', e => {
+            inp.addEventListener('change', async e => {
                 const name = e.currentTarget.name;
                 if (!name) return;
                 localStorage[name] = e.currentTarget.value; 
@@ -71,27 +121,71 @@
                 if ([...$inpPrompts].filter(i => i.value.trim() === '').length) return;
                 const prompt = generatePrompt(); 
                 $prompt.textContent = prompt;
+
+                console.log('Payload:', prompt)
+
+                const result = await postPrompt(prompt); 
+                // $result.textContent = result.info; 
+
+                const resultObj = JSON.parse(result.info);
+                console.log(resultObj)
+
+                let entireDayPlan = '';
+                for(let [x, y] of Object.entries(resultObj)) {
+                    entireDayPlan += `<div class="margin-top-20"><div class="day">${x}</div> <div>${JSON.stringify(y)}</div></div>`; 
+                }
+
+                /*const entireDayPlan = resultObj.plan.map(p => {
+                    const { day, activities } = p;
+                    const dayDiv = `<div class="day">${day}</div>`;
+                    const activityHTML = activities.map(a => {
+                        const { activity, location, time } = a;
+                        const activityDiv = `<div>${activity}</div>`;
+                        const locationDiv = `<div>${location}</div>`;
+                        const timeDiv = `<div>${time}</div>`;
+                        return activityDiv + locationDiv + timeDiv;
+                    });
+                    return `<div class="day-plan">${dayDiv + activityHTML}</div>`; 
+                });*/
+
+                $result.innerHTML = entireDayPlan; 
+
+                console.log(entireDayPlan)
+
+                /*
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', '/');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                let payload = JSON.stringify(prompt);
+                xhr.send(payload); 
+                */
+
             });
         });
 
-        const players = ['mimi','wewe','sisi','nyinyi'];
+        async function postPrompt(prompt) {
+            const res = await fetch(baseUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    payload: prompt
+                })
+            });
 
-        fetch('/play', {
-            method: 'POST', 
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(players)
-        }).then(response => {
-            // this line of code depends upon what type of response you're expecting
-            return response.text();     
-        }).then(result => {
-            console.log(result);
-        }).catch(err => {
-            console.log(err);
-        });
-        
+            return res.json();
+        }
 
+        async function getInfo() {
+            console.log('getInfo running...')
+            const res = await fetch(baseUrl + 'info', { method: 'GET' });
+            console.log('Res:', res);
+            const data = await res.json();
+            $result.textContent = data.info;
+        }
+
+        // getInfo();
     </script>
 </body>
-</html> 
+</html>
