@@ -75,8 +75,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        const baseUrl = 'https://themuno.github.io/prompt-gemini/';
-        //'https://a3e1-197-232-61-202.ngrok-free.app/'; //'http://localhost:3000/';
+        const baseUrl = 'https://themuno.github.io/prompt-gemini/';  //'http://localhost:3000/';
+        //'https://a3e1-197-232-61-202.ngrok-free.app/'; 
 
         const fp = flatpickr('.travel-dates', {
             mode: 'range',
@@ -128,7 +128,7 @@
                 const result = await postPrompt(prompt); 
                 // $result.textContent = result.info; 
 
-                const resultObj = JSON.parse(result.info);
+                const resultObj = result.info //JSON.parse(result.info);
                 console.log(resultObj)
 
                 let entireDayPlan = '';
@@ -164,8 +164,8 @@
             });
         });
 
-        async function postPrompt(prompt) {
-            const res = await fetch(baseUrl, {
+        async function postPrompt(prompt={}) {
+            const res = await fetch(baseUrl + '', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -177,6 +177,8 @@
 
             return res.json();
         }
+
+        postPrompt({status:'test book'}); 
 
         async function getInfo() {
             console.log('getInfo running...')
