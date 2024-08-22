@@ -165,7 +165,7 @@
         });
 
         async function postPrompt(prompt={}) {
-            const res = await fetch(baseUrl + 'prompt-gemini/index.html', {
+            const res = await fetch(baseUrl + 'prompt-gemini', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
