@@ -75,7 +75,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        const baseUrl = 'http://localhost:3000/'; //'https://themuno.github.io/prompt-gemini/';
+        const baseUrl = 'https://themuno.github.io/';
+        //'http://localhost:3000/'; //'https://themuno.github.io/prompt-gemini/';
         //'https://a3e1-197-232-61-202.ngrok-free.app/'; 
 
         const fp = flatpickr('.travel-dates', {
@@ -165,7 +166,7 @@
         });
 
         async function postPrompt(prompt) {
-            const res = await fetch(baseUrl + 'test/try.html', {
+            const res = await fetch(baseUrl + 'prompt-gemini/try.html', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
