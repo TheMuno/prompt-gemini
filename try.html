@@ -56,7 +56,6 @@
     </style>
 </head>
 <body>
-    <input type="button" value="Try.html" class="try-btn">
     <div class="query">
         <h1>Prompt Gemini</h1>
         <form> <!-- action="POST" -->
@@ -76,12 +75,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        document.querySelector('.try-btn').addEventListener('click', e => {
-            window.location = '/try.html';
-        });
-
-        const baseUrl = 'https://askkhonsu-com-b7537072c076b7af0bbe93c4e.webflow.io/';
-        //'https://themuno.github.io/';  //'http://localhost:3000/';
+        const baseUrl = 'http://localhost:3000/'; //'https://themuno.github.io/prompt-gemini/';
         //'https://a3e1-197-232-61-202.ngrok-free.app/'; 
 
         const fp = flatpickr('.travel-dates', {
@@ -170,8 +164,8 @@
             });
         });
 
-        async function postPrompt(prompt={}) {
-            const res = await fetch(baseUrl + '', {
+        async function postPrompt(prompt) {
+            const res = await fetch(baseUrl + 'test/try.html', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -184,7 +178,7 @@
             return res.json();
         }
 
-        postPrompt({status:'test book'}); 
+        postPrompt({status:'test book'});
 
         async function getInfo() {
             console.log('getInfo running...')
